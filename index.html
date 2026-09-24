@@ -208,6 +208,14 @@ mark.searchhit{background:var(--amber); color:#1a1200; border-radius:2px; paddin
 @media (max-width:700px){ .site-search{display:none;} }
 .simple-box{background:rgba(111,239,159,0.06); border:1px solid #2f6b4a; border-left:4px solid var(--green); border-radius:0 var(--radius) var(--radius) 0; padding:12px 16px; margin:14px 0 4px; font-size:14px; color:var(--text);}
 .simple-box b{color:var(--green); font-family:var(--mono); font-size:11px; text-transform:uppercase; letter-spacing:0.06em; display:block; margin-bottom:4px;}
+.ai-modal{position:fixed; inset:0; z-index:2000; background:rgba(4,10,16,0.7); display:flex; align-items:center; justify-content:center;}
+.ai-modal.hidden{display:none;}
+.ai-modal-box{background:var(--panel); border:1px solid var(--line-bright); border-radius:var(--radius); padding:22px 24px; width:min(440px,88vw);}
+.ai-modal-box input[type=password], .ai-modal-box input[type=text]{width:100%; background:var(--panel-2); border:1px solid var(--line-bright); color:var(--text); border-radius:var(--radius); padding:9px 10px; font-family:var(--mono); font-size:12.5px;}
+.ai-answer{border-top:1px solid var(--line-bright); padding:12px 14px; font-size:12.5px; color:var(--text-dim);}
+.ai-answer b{color:var(--cyan); font-family:var(--mono); font-size:11px; text-transform:uppercase; letter-spacing:0.06em; display:block; margin-bottom:6px;}
+.ai-ask-btn{display:block; width:100%; text-align:left; background:none; border:none; border-top:1px solid var(--line); color:var(--cyan); font-family:var(--mono); font-size:12px; padding:10px 14px; cursor:pointer;}
+.ai-ask-btn:hover{background:var(--panel-2);}
 .tablewrap{overflow-x:auto;}
 table.compare{width:100%; border-collapse:collapse; font-size:12.8px;}
 table.compare th{color:var(--cyan); font-family:var(--mono); text-align:left; padding:6px 8px; border-bottom:1px solid var(--line-bright);}
@@ -225,6 +233,24 @@ table.compare td{padding:6px 8px; border-bottom:1px solid var(--line); color:var
   </div>
   <div id="lockHint">&nbsp;</div>
 </div>
+
+<div id="aiModal" class="ai-modal hidden">
+  <div class="ai-modal-box">
+    <h3 style="margin-bottom:4px;">🤖 AI-powered search</h3>
+    <p style="font-size:12.5px;">Paste your own free <a href="https://openrouter.ai/keys" target="_blank" rel="noopener">OpenRouter</a> API key. It's saved only in <b style="color:var(--text);">this browser</b> (localStorage) — never written into this file, never sent anywhere except OpenRouter. Uses a free-tier model, so it costs nothing.</p>
+    <input id="aiKeyInput" type="password" placeholder="sk-or-v1-..." autocomplete="off" spellcheck="false">
+    <div class="control-row" style="margin-top:10px;">
+      <label style="min-width:70px;">Model</label>
+      <input id="aiModelInput" type="text" value="meta-llama/llama-3.2-3b-instruct:free" style="flex:1; width:auto;">
+    </div>
+    <p style="font-size:11px; color:var(--text-faint); margin-top:2px;">Default is a free OpenRouter model. Swap in any other free model slug (they end in <span class="mono">:free</span>) if this one is unavailable.</p>
+    <div class="control-row" style="justify-content:flex-end; gap:8px; margin-top:14px;">
+      <button class="btn ghost" id="aiClearBtn">Clear key</button>
+      <button class="btn" id="aiSaveBtn">Save</button>
+      <button class="btn ghost" id="aiCloseBtn">Close</button>
+    </div>
+  </div>
+</div>
 <div class="nav-wrap">
   <div class="topbar">
     <div class="brand"><span class="dot"></span>SYS ENG &amp; PHYSICS 3&4</div>
@@ -238,6 +264,7 @@ table.compare td{padding:6px 8px; border-bottom:1px solid var(--line); color:var
       <input id="siteSearch" type="text" placeholder="Search the guide..." autocomplete="off" spellcheck="false">
       <div id="siteResults"></div>
     </div>
+    <button class="subj-btn" id="aiSettingsBtn" title="AI search settings" style="padding:7px 10px;">🤖</button>
   </div>
   <nav class="submenu topnav" id="submenu-systems">
     <a href="#process">Systems Process</a>
@@ -1550,7 +1577,7 @@ table.compare td{padding:6px 8px; border-bottom:1px solid var(--line); color:var
 </main>
 
 <footer>
-  BUILT FOR VCE SYSTEMS ENGINEERING 3&amp;4 AND PHYSICS 3&amp;4 · OPEN SOURCE ON GITHUB PAGES
+  BUILT FOR SYSTEMS ENGINEERING 3&amp;4 · STATIC SITE — NO DATA COLLECTED, NO BACKEND · OPEN SOURCE ON GITHUB PAGES
 </footer>
 <script>
 (function(){
@@ -1628,29 +1655,118 @@ function fmt(n, d){ d = (d===undefined)?2:d; if(!isFinite(n)) return '—'; retu
     q = q.trim().toLowerCase();
     resultsBox.innerHTML = '';
     if(!q){ resultsBox.classList.remove('open'); return; }
-    const hits = sections.filter(s=> s.heading.toLowerCase().includes(q) || s.text.toLowerCase().includes(q)).slice(0,8);
+    const hits = sections.filter(s=> s.heading.toLowerCase().includes(q) || s.text.toLowerCase().includes(q)).slice(0,6);
     if(hits.length===0){
       resultsBox.innerHTML = '<div class="no-results">No results for "'+q.replace(/</g,'&lt;')+'"</div>';
-      resultsBox.classList.add('open');
-      return;
+    } else {
+      hits.forEach(h=>{
+        const idx = h.text.toLowerCase().indexOf(q);
+        let snippet = idx>=0 ? h.text.substring(Math.max(0,idx-40), idx+60) : h.text.substring(0,80);
+        const re = new RegExp('('+q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+')','ig');
+        snippet = snippet.replace(re, '<mark class="searchhit">$1</mark>');
+        const a = document.createElement('a');
+        a.href = '#'+h.id;
+        a.innerHTML = '<b>'+h.heading+'</b><br>…'+snippet+'…';
+        a.addEventListener('click', ()=>{ resultsBox.classList.remove('open'); });
+        resultsBox.appendChild(a);
+      });
     }
-    hits.forEach(h=>{
-      const idx = h.text.toLowerCase().indexOf(q);
-      let snippet = idx>=0 ? h.text.substring(Math.max(0,idx-40), idx+60) : h.text.substring(0,80);
-      const re = new RegExp('('+q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+')','ig');
-      snippet = snippet.replace(re, '<mark class="searchhit">$1</mark>');
-      const a = document.createElement('a');
-      a.href = '#'+h.id;
-      a.innerHTML = '<b>'+h.heading+'</b><br>…'+snippet+'…';
-      a.addEventListener('click', ()=>{ resultsBox.classList.remove('open'); });
-      resultsBox.appendChild(a);
-    });
+    let hasKey = false;
+    try{ hasKey = !!localStorage.getItem('orApiKey'); }catch(e){}
+    if(hasKey){
+      const askBtn = document.createElement('button');
+      askBtn.type = 'button';
+      askBtn.className = 'ai-ask-btn';
+      askBtn.textContent = '🤖 Ask AI about "'+q+'"';
+      askBtn.addEventListener('click', ()=> askAI(q, hits));
+      resultsBox.appendChild(askBtn);
+    }
     resultsBox.classList.add('open');
   }
+  window.__seRunSearch = runSearch;
   searchInput.addEventListener('input', ()=>runSearch(searchInput.value));
   searchInput.addEventListener('focus', ()=>{ if(searchInput.value.trim()) resultsBox.classList.add('open'); });
   document.addEventListener('click', (e)=>{
-    if(!e.target.closest('.site-search')) resultsBox.classList.remove('open');
+    if(!e.target.closest('.site-search') && !e.target.closest('.ai-modal')) resultsBox.classList.remove('open');
+  });
+
+  async function askAI(question, hits){
+    let old = resultsBox.querySelector('.ai-answer');
+    if(old) old.remove();
+    const box = document.createElement('div');
+    box.className = 'ai-answer';
+    box.innerHTML = '<b>AI answer</b>Thinking…';
+    resultsBox.appendChild(box);
+
+    let key = null, model = 'meta-llama/llama-3.2-3b-instruct:free';
+    try{
+      key = localStorage.getItem('orApiKey');
+      model = localStorage.getItem('orModel') || model;
+    }catch(e){}
+    if(!key){
+      box.innerHTML = '<b>AI answer</b>No API key set yet. Click the 🤖 button in the top bar to add your free OpenRouter key.';
+      return;
+    }
+    const context = hits.slice(0,3).map(h=> h.heading+': '+h.text.substring(0,600)).join('\n\n');
+    const sys = "You are a concise tutor for VCE Systems Engineering and Physics Units 3&4. Answer the student's question in 3-5 short sentences, plain language first. Use the provided study-guide excerpts as context if relevant, but you can also use your own knowledge.";
+    try{
+      const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer '+key,
+        },
+        body: JSON.stringify({
+          model: model,
+          messages: [
+            { role: 'system', content: sys },
+            { role: 'user', content: 'Study guide context:\n'+context+'\n\nQuestion: '+question }
+          ],
+          max_tokens: 400,
+        })
+      });
+      if(!res.ok){
+        const errText = await res.text();
+        box.innerHTML = '<b>AI answer</b>Request failed ('+res.status+'). Check your API key/model in 🤖 settings.<br><span style="font-size:10.5px; color:var(--text-faint);">'+errText.substring(0,200).replace(/</g,'&lt;')+'</span>';
+        return;
+      }
+      const data = await res.json();
+      const answer = data.choices && data.choices[0] && data.choices[0].message ? data.choices[0].message.content : 'No answer returned.';
+      box.innerHTML = '<b>AI answer</b>' + answer.replace(/</g,'&lt;').replace(/\n/g,'<br>');
+    }catch(err){
+      box.innerHTML = '<b>AI answer</b>Couldn\'t reach OpenRouter — this only works when the page is hosted normally (e.g. GitHub Pages) or opened as a local file, not inside a sandboxed preview.';
+    }
+  }
+})();
+
+(function(){
+  const modal = document.getElementById('aiModal');
+  const openBtn = document.getElementById('aiSettingsBtn');
+  const closeBtn = document.getElementById('aiCloseBtn');
+  const saveBtn = document.getElementById('aiSaveBtn');
+  const clearBtn = document.getElementById('aiClearBtn');
+  const keyInput = document.getElementById('aiKeyInput');
+  const modelInput = document.getElementById('aiModelInput');
+  if(!modal || !openBtn) return;
+  openBtn.addEventListener('click', ()=>{
+    try{
+      keyInput.value = localStorage.getItem('orApiKey') || '';
+      modelInput.value = localStorage.getItem('orModel') || 'meta-llama/llama-3.2-3b-instruct:free';
+    }catch(e){}
+    modal.classList.remove('hidden');
+  });
+  closeBtn.addEventListener('click', ()=> modal.classList.add('hidden'));
+  modal.addEventListener('click', (e)=>{ if(e.target===modal) modal.classList.add('hidden'); });
+  saveBtn.addEventListener('click', ()=>{
+    try{
+      if(keyInput.value.trim()) localStorage.setItem('orApiKey', keyInput.value.trim());
+      localStorage.setItem('orModel', modelInput.value.trim() || 'meta-llama/llama-3.2-3b-instruct:free');
+    }catch(e){}
+    modal.classList.add('hidden');
+  });
+  clearBtn.addEventListener('click', ()=>{
+    try{ localStorage.removeItem('orApiKey'); }catch(e){}
+    keyInput.value = '';
   });
 })();
 (function(){
