@@ -197,7 +197,7 @@ table.compare td{padding:6px 8px; border-bottom:1px solid var(--line); color:var
 <div id="lockScreen">
   <div class="lock-eyebrow">// PRIVATE REPOSITORY</div>
   <h1>🔒 This site is locked</h1>
-  <p>Log In to unlock the full study guide.</p>
+  <p>Login to unlock the full study guide.</p>
   <div class="search-wrap">
     <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
     <input id="lockSearch" type="text" placeholder="Search..." autocomplete="off" spellcheck="false">
@@ -208,6 +208,7 @@ table.compare td{padding:6px 8px; border-bottom:1px solid var(--line); color:var
   <div class="topbar">
     <div class="brand"><span class="dot"></span>SYS ENG &amp; PHYSICS 3&4</div>
     <div class="subject-switch">
+      <button class="subj-btn" id="relockBtn" title="Lock site" style="padding:7px 12px;">🔒</button>
       <button class="subj-btn active" data-subject="systems">⚙ Systems Engineering</button>
       <button class="subj-btn" data-subject="physics">⚛ Physics</button>
     </div>
@@ -1375,6 +1376,18 @@ function fmt(n, d){ d = (d===undefined)?2:d; if(!isFinite(n)) return '—'; retu
       hint.textContent = 'No results found.';
     }
   });
+
+  const relockBtn = document.getElementById('relockBtn');
+  if(relockBtn){
+    relockBtn.addEventListener('click', ()=>{
+      try{ localStorage.removeItem('seUnlocked'); }catch(e){}
+      body.classList.add('locked');
+      lockScreen.classList.remove('hidden');
+      input.value = '';
+      hint.textContent = '\u00A0';
+      input.focus();
+    });
+  }
 })();
 
 (function(){
