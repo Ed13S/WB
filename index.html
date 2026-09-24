@@ -187,6 +187,27 @@ body.locked .nav-wrap, body.locked main, body.locked footer{display:none;}
 #lockSearch.shake{animation:shakeIt .35s;}
 @keyframes shakeIt{0%,100%{transform:translateX(0);}25%{transform:translateX(-6px);}75%{transform:translateX(6px);}}
 #lockHint{font-family:var(--mono); font-size:11px; color:var(--text-faint);}
+.site-search{position:relative; flex:1; max-width:340px; margin:0 14px;}
+.site-search svg{position:absolute; left:11px; top:50%; transform:translateY(-50%); width:14px; height:14px; stroke:var(--text-faint); pointer-events:none;}
+#siteSearch{
+  width:100%; background:var(--panel-2); border:1px solid var(--line-bright); color:var(--text);
+  border-radius:18px; padding:8px 12px 8px 32px; font-family:var(--mono); font-size:12.5px; outline:none;
+}
+#siteSearch:focus{border-color:var(--cyan);}
+#siteResults{
+  position:absolute; top:calc(100% + 6px); left:0; right:0; background:var(--panel); border:1px solid var(--line-bright);
+  border-radius:var(--radius); max-height:320px; overflow-y:auto; display:none; z-index:200; box-shadow:0 12px 30px rgba(0,0,0,0.4);
+}
+#siteResults.open{display:block;}
+#siteResults a{display:block; padding:10px 14px; font-family:var(--mono); font-size:12px; color:var(--text-dim); text-decoration:none; border-bottom:1px solid var(--line);}
+#siteResults a:last-child{border-bottom:none;}
+#siteResults a:hover{background:var(--panel-2); color:var(--cyan);}
+#siteResults a b{color:var(--amber);}
+#siteResults .no-results{padding:12px 14px; font-size:12px; color:var(--text-faint);}
+mark.searchhit{background:var(--amber); color:#1a1200; border-radius:2px; padding:0 1px;}
+@media (max-width:700px){ .site-search{display:none;} }
+.simple-box{background:rgba(111,239,159,0.06); border:1px solid #2f6b4a; border-left:4px solid var(--green); border-radius:0 var(--radius) var(--radius) 0; padding:12px 16px; margin:14px 0 4px; font-size:14px; color:var(--text);}
+.simple-box b{color:var(--green); font-family:var(--mono); font-size:11px; text-transform:uppercase; letter-spacing:0.06em; display:block; margin-bottom:4px;}
 .tablewrap{overflow-x:auto;}
 table.compare{width:100%; border-collapse:collapse; font-size:12.8px;}
 table.compare th{color:var(--cyan); font-family:var(--mono); text-align:left; padding:6px 8px; border-bottom:1px solid var(--line-bright);}
@@ -197,7 +218,7 @@ table.compare td{padding:6px 8px; border-bottom:1px solid var(--line); color:var
 <div id="lockScreen">
   <div class="lock-eyebrow">// PRIVATE REPOSITORY</div>
   <h1>🔒 This site is locked</h1>
-  <p>Login to unlock the full study guide.</p>
+  <p>Log In to unlock the full study guide.</p>
   <div class="search-wrap">
     <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
     <input id="lockSearch" type="text" placeholder="Search..." autocomplete="off" spellcheck="false">
@@ -211,6 +232,11 @@ table.compare td{padding:6px 8px; border-bottom:1px solid var(--line); color:var
       <button class="subj-btn" id="relockBtn" title="Lock site" style="padding:7px 12px;">🔒</button>
       <button class="subj-btn active" data-subject="systems">⚙ Systems Engineering</button>
       <button class="subj-btn" data-subject="physics">⚛ Physics</button>
+    </div>
+    <div class="site-search">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input id="siteSearch" type="text" placeholder="Search the guide..." autocomplete="off" spellcheck="false">
+      <div id="siteResults"></div>
     </div>
   </div>
   <nav class="submenu topnav" id="submenu-systems">
@@ -240,6 +266,7 @@ table.compare td{padding:6px 8px; border-bottom:1px solid var(--line); color:var
     <a href="#phys-fields">Fields</a>
     <a href="#phys-induction">Electromagnetic Induction</a>
     <a href="#phys-waves">Waves, Light &amp; Quanta</a>
+    <a href="#phys-relativity">Special Relativity</a>
     <a href="#phys-formulae">Formula Sheet</a>
   </nav>
 </div>
@@ -258,12 +285,14 @@ table.compare td{padding:6px 8px; border-bottom:1px solid var(--line); color:var
 
   <section class="topic" id="process">
     <div class="topic-head"><span class="num">01</span><h2>The Systems Engineering Process</h2></div>
+    <div class="simple-box"><b>Simple version</b>Every engineering project follows the same 5 steps, in order: figure out the problem, come up with and design a solution, plan how to build it, actually build it, then check if it worked.</div>
     <p class="topic-sub">Every project in this study — no matter the system — moves through the same five activities. It isn't linear: you constantly loop back to re-test, re-plan and re-design as you learn more.</p>
     <div class="grid3" id="processGrid" style="grid-template-columns:repeat(5,1fr);"></div>
   </section>
 
   <section class="topic" id="feedback">
     <div class="topic-head"><span class="num">02</span><h2>Control, Integration &amp; Feedback</h2></div>
+    <div class="simple-box"><b>Simple version</b>Open-loop = it just does its thing and doesn't check the result (a toaster running for a set time). Closed-loop = it checks the result and corrects itself (a thermostat that keeps checking the room temperature).</div>
     <p class="topic-sub">An <b style="color:var(--text);">open-loop</b> system just acts on its input and hopes for the best — a toaster runs for a fixed time regardless of how the toast actually looks. A <b style="color:var(--text);">closed-loop</b> system adds a sensor that measures the output and <b style="color:var(--text);">feeds it back</b> to adjust the process — a thermostat checks the room temperature and keeps correcting. Toggle the loop below.</p>
     <div class="panel">
       <div class="control-row" style="justify-content:center;">
@@ -282,6 +311,7 @@ table.compare td{padding:6px 8px; border-bottom:1px solid var(--line); color:var
   </section>
   <section class="topic" id="formulae">
     <div class="topic-head"><span class="num">03</span><h2>Formula Triangles</h2></div>
+    <div class="simple-box"><b>Simple version</b>A formula triangle is a trick for rearranging an equation like V = I × R. Cover the letter you want to find, and the triangle shows you whether to multiply or divide the other two.</div>
     <p class="topic-sub">Every "magic triangle" in the study design encodes the same idea: cover the thing you don't know, and the triangle tells you whether to multiply or divide. Pick a triangle, enter any two values, and watch the third one solve itself.</p>
 
     <div class="grid2">
@@ -312,6 +342,7 @@ table.compare td{padding:6px 8px; border-bottom:1px solid var(--line); color:var
   </section>
   <section class="topic" id="circuits">
     <div class="topic-head"><span class="num">04</span><h2>Circuits: Series, Parallel &amp; Voltage Dividers</h2></div>
+    <div class="simple-box"><b>Simple version</b>In a series circuit, everything is in one loop, so the same current flows everywhere. In a parallel circuit, there are multiple paths, so the current splits up.</div>
     <p class="topic-sub">The rule students misquote most: in series, current is constant and voltage splits; in parallel, voltage is constant and current splits. Watch the dots (current) and the bars (voltage) to see why.</p>
 
     <div class="grid2">
@@ -417,6 +448,7 @@ table.compare td{padding:6px 8px; border-bottom:1px solid var(--line); color:var
   </section>
   <section class="topic" id="diodes">
     <div class="topic-head"><span class="num">05</span><h2>Diodes &amp; Rectification</h2></div>
+    <div class="simple-box"><b>Simple version</b>A diode is a one-way valve for electricity — current can only flow through it in one direction, like a check valve in plumbing.</div>
     <p class="topic-sub">A diode only lets current through in one direction. Wire four of them into a diamond — a <b style="color:var(--text)">bridge rectifier</b> — and an AC supply that swings positive and negative comes out the other side always pushing the same way. The waveform below is drawn in full so you can see the whole AC cycle and the resulting DC output at once, synced to the live current path.</p>
 
     <div class="panel">
@@ -441,6 +473,7 @@ table.compare td{padding:6px 8px; border-bottom:1px solid var(--line); color:var
   </section>
   <section class="topic" id="transistors">
     <div class="topic-head"><span class="num">06</span><h2>Transistors</h2></div>
+    <div class="simple-box"><b>Simple version</b>A transistor is an electronic switch. A tiny current at one pin (the base) controls whether a much bigger current can flow through the other two pins.</div>
     <p class="topic-sub">A transistor is a current-controlled switch (or amplifier): a small signal at the base terminal controls a much larger current flowing between collector and emitter. Slide the base voltage and watch which region the transistor is operating in.</p>
 
     <div class="grid2">
@@ -468,6 +501,7 @@ table.compare td{padding:6px 8px; border-bottom:1px solid var(--line); color:var
 
   <section class="topic" id="capacitors">
     <div class="topic-head"><span class="num">07</span><h2>Capacitors</h2></div>
+    <div class="simple-box"><b>Simple version</b>A capacitor is like a tiny, fast rechargeable battery — it stores a small amount of charge and can release it very quickly.</div>
     <p class="topic-sub">A capacitor stores charge temporarily (Q = CV). It blocks steady DC once fully charged but lets AC through — useful for smoothing, timing and filtering. Charging and discharging both follow the same exponential curve, just mirrored.</p>
 
     <div class="grid2">
@@ -499,6 +533,7 @@ table.compare td{padding:6px 8px; border-bottom:1px solid var(--line); color:var
   </section>
   <section class="topic" id="components">
     <div class="topic-head"><span class="num">08</span><h2>More Electrotechnological Components</h2></div>
+    <div class="simple-box"><b>Simple version</b>This is just a picture dictionary of extra parts you'll see in circuits — transformers, ICs, displays, meters and the boards you build circuits on.</div>
     <p class="topic-sub">Beyond the basics, the study design also expects you to recognise these — you won't build a full interactive model of a microcontroller, but you should know what it does and what it looks like on a schematic.</p>
     <div class="grid3">
       <div class="panel"><h4>Transformer</h4><p style="font-size:13px;">Steps AC voltage up or down using two magnetically-coupled coils. The ratio of turns sets the ratio of voltages.</p>
@@ -519,6 +554,7 @@ table.compare td{padding:6px 8px; border-bottom:1px solid var(--line); color:var
 
   <section class="topic" id="motorsgens">
     <div class="topic-head"><span class="num">09</span><h2>Motors, Solenoids, Generators &amp; Switching</h2></div>
+    <div class="simple-box"><b>Simple version</b>Motors turn electricity into movement. Generators do the reverse — movement into electricity. Solenoids and relays are just switches/movers controlled by electromagnets.</div>
     <p class="topic-sub">Devices that convert electrical energy to motion (or the reverse), and the components used to switch and control them — all explicitly named in the study design's component list.</p>
     <div class="grid3">
       <div class="panel"><h4>DC motor (brushed)</h4><p style="font-size:13px;">Current through a coil in a magnetic field produces a turning force (torque). A commutator/brushes reverse current direction every half-turn to keep it spinning. Simple, cheap, but brushes wear out.</p></div>
@@ -545,6 +581,7 @@ table.compare td{padding:6px 8px; border-bottom:1px solid var(--line); color:var
 
   <section class="topic" id="magnetism">
     <div class="topic-head"><span class="num">10</span><h2>Magnetism</h2></div>
+    <div class="simple-box"><b>Simple version</b>Electricity and magnetism are linked: current flowing through a coiled wire creates a magnetic field, and you can make that field stronger by adding more coils, more current, or an iron core.</div>
     <p class="topic-sub">A magnetic field is a "void" mapped by the direction a compass needle points around a magnet. An electromagnet's strength depends on a handful of factors — toggle them to see the field respond.</p>
     <div class="grid2">
       <div class="panel">
@@ -570,6 +607,7 @@ table.compare td{padding:6px 8px; border-bottom:1px solid var(--line); color:var
 
   <section class="topic" id="motion">
     <div class="topic-head"><span class="num">11</span><h2>Motion &amp; Free Body Diagrams</h2></div>
+    <div class="simple-box"><b>Simple version</b>Objects move in 4 basic ways: straight-line (linear), spinning (rotary), back-and-forth in a line (reciprocating), or swinging (oscillating). A free body diagram is just a picture of every force pushing or pulling on an object.</div>
     <p class="topic-sub">Four categories of mechanical motion recur throughout the course, plus one tool that applies to nearly every mechanical question: the free body diagram.</p>
     <div class="grid3">
       <div class="panel"><h4>Linear</h4><p style="font-size:13px;">Motion in a straight line.</p></div>
@@ -604,6 +642,7 @@ table.compare td{padding:6px 8px; border-bottom:1px solid var(--line); color:var
 
   <section class="topic" id="moments">
     <div class="topic-head"><span class="num">12</span><h2>Torque &amp; Moments</h2></div>
+    <div class="simple-box"><b>Simple version</b>A moment is just a turning force — like pushing on a door far from its hinges makes it easier to open than pushing near the hinges. Force × distance from the pivot = moment.</div>
     <p class="topic-sub">A moment (or torque) is a turning effect: M = F &times; D. Balance a seesaw by dragging the sliders until the clockwise and anticlockwise moments match.</p>
     <div class="panel">
       <div class="diagram-frame" style="display:flex; justify-content:center;">
@@ -625,6 +664,7 @@ table.compare td{padding:6px 8px; border-bottom:1px solid var(--line); color:var
 
   <section class="topic" id="vectors">
     <div class="topic-head"><span class="num">13</span><h2>Vectors</h2></div>
+    <div class="simple-box"><b>Simple version</b>A vector is a measurement that has both a size and a direction (like "20 N to the right"), as opposed to just a number on its own. Two vectors can be combined into one "resultant" vector.</div>
     <p class="topic-sub">Vectors add tip-to-tail. Set the magnitude and angle of two force vectors and watch the resultant — and its x/y components — build live.</p>
     <div class="grid2">
       <div class="panel">
@@ -645,6 +685,7 @@ table.compare td{padding:6px 8px; border-bottom:1px solid var(--line); color:var
   </section>
   <section class="topic" id="machines">
     <div class="topic-head"><span class="num">14</span><h2>Simple Machines</h2></div>
+    <div class="simple-box"><b>Simple version</b>A simple machine (lever, pulley, screw, ramp...) lets you trade force for distance — push with less force over a longer distance, and you can lift something heavier than you could on your own.</div>
     <p class="topic-sub">Every simple machine trades force for distance (or the reverse). Mechanical Advantage (MA) tells you how much the machine multiplies your input force; Velocity Ratio (VR) tells you the distance trade-off. In a real, frictional machine, MA is always a little less than VR.</p>
     <div class="formula-box" style="display:block; margin-bottom:18px;">MA = load / effort &nbsp;|&nbsp; VR = distance moved by effort / distance moved by load &nbsp;|&nbsp; efficiency = (MA / VR) &times; 100%</div>
 
@@ -810,6 +851,7 @@ table.compare td{padding:6px 8px; border-bottom:1px solid var(--line); color:var
   </section>
   <section class="topic" id="springs">
     <div class="topic-head"><span class="num">15</span><h2>Springs</h2></div>
+    <div class="simple-box"><b>Simple version</b>The more you stretch or squeeze a spring, the harder it pushes back — and that relationship is a simple straight line, right up until you stretch it too far and it stays bent out of shape.</div>
     <p class="topic-sub">Hooke's Law: force is proportional to extension, right up until the elastic limit — stretch it further and the spring deforms permanently. Springs may be loaded in <b style="color:var(--text)">tension</b> (stretched, like a screen-door spring) or <b style="color:var(--text)">compression</b> (squeezed, like a car suspension spring).</p>
     <div class="panel">
       <div class="grid2">
@@ -830,6 +872,7 @@ table.compare td{padding:6px 8px; border-bottom:1px solid var(--line); color:var
 
   <section class="topic" id="hydraulics">
     <div class="topic-head"><span class="num">16</span><h2>Hydraulics &amp; Pneumatics</h2></div>
+    <div class="simple-box"><b>Simple version</b>Because liquid can't be squeezed smaller, pushing on it in one spot pushes out everywhere else with equal pressure — that's how a small hydraulic piston can lift something huge on the other end.</div>
     <p class="topic-sub">Water (or oil) is incompressible; Pascal's Law says pressure applied anywhere in a sealed fluid is transmitted equally throughout it. Because pressure is the same everywhere, a small piston pushing into a larger one multiplies force. Pneumatics uses compressed <i>air</i> instead — faster and cleaner, but less precise and less powerful than hydraulics.</p>
     <div class="panel">
       <div class="formula-box" style="display:block; margin-bottom:16px;">F1/A1 = F2/A2 &nbsp;&nbsp;|&nbsp;&nbsp; P = F/A (measured in Pascals, Pa)</div>
@@ -850,6 +893,7 @@ table.compare td{padding:6px 8px; border-bottom:1px solid var(--line); color:var
 
   <section class="topic" id="ethics">
     <div class="topic-head"><span class="num">17</span><h2>Ethical Design, Systems Production &amp; Risk</h2></div>
+    <div class="simple-box"><b>Simple version</b>Good engineers don't just make something that works — they think about who it affects, keep people safe while building and using it, and keep proper records of what they did and why.</div>
     <p class="topic-sub">A system isn't finished when it works — it's finished when it works responsibly, and when the process used to build it is documented and repeatable. This section covers the "Ethical Systems Design" and "Systems Production" areas of study.</p>
 
     <div class="grid3">
@@ -901,6 +945,7 @@ table.compare td{padding:6px 8px; border-bottom:1px solid var(--line); color:var
 
   <section class="topic" id="cleanenergy">
     <div class="topic-head"><span class="num">18</span><h2>Clean Energy Technologies</h2></div>
+    <div class="simple-box"><b>Simple version</b>Energy sources are either non-renewable (will run out — coal, oil, gas, nuclear) or renewable (won't run out — sun, wind, water, heat from the earth). Every source loses some energy at each step from source to your wall socket.</div>
     <p class="topic-sub">This area is separately assessed coursework. The core question throughout: where does the energy come from, how efficiently is it converted and delivered, and what does that cost environmentally, economically and socially across the whole life cycle?</p>
 
     <div class="grid2">
@@ -943,6 +988,7 @@ table.compare td{padding:6px 8px; border-bottom:1px solid var(--line); color:var
 
   <section class="topic" id="emerging">
     <div class="topic-head"><span class="num">19</span><h2>New &amp; Emerging Technologies</h2></div>
+    <div class="simple-box"><b>Simple version</b>For any new piece of technology, ask the same 5 questions: what is it, how does it work, why did it appear now, what's good about it, and what's bad about it.</div>
     <p class="topic-sub">This area is also separately assessed coursework — you'll typically research a specific real technology, but the study design's framing questions are consistent across any example you pick.</p>
     <div class="grid2">
       <div class="panel">
@@ -970,6 +1016,7 @@ table.compare td{padding:6px 8px; border-bottom:1px solid var(--line); color:var
 
   <section class="topic" id="phys-motion">
     <div class="topic-head"><span class="num">21</span><h2>Motion</h2></div>
+    <div class="simple-box"><b>Simple version</b>This is the maths of things moving and things pushing on each other — how fast, how far, and what happens when things speed up, slow down, turn a corner, or crash into each other.</div>
     <p class="topic-sub">Unit 3 opens with Newton's three laws and how they explain everything from a dropped ball to a rocket launch. The maths is the same triangle-and-formula approach as Systems Engineering — the physics is in reading what the numbers mean.</p>
 
     <div class="tabs" id="motionTabs">
@@ -977,6 +1024,7 @@ table.compare td{padding:6px 8px; border-bottom:1px solid var(--line); color:var
       <button data-tab="newton">Newton's Laws</button>
       <button data-tab="projectile">Projectile Motion</button>
       <button data-tab="circular">Circular Motion</button>
+      <button data-tab="workenergy">Work &amp; Energy</button>
       <button data-tab="momentum">Momentum</button>
     </div>
 
@@ -1048,6 +1096,38 @@ table.compare td{padding:6px 8px; border-bottom:1px solid var(--line); color:var
           </div>
         </div>
       </div>
+      <div class="grid2" style="margin-top:16px;">
+        <div class="panel"><h4>Banked track</h4><p style="font-size:13px;">On a banked (tilted) curve, part of the <b style="color:var(--text);">normal force</b> itself points toward the centre of the circle, so friction doesn't have to supply all the centripetal force — that's why banking lets vehicles corner faster safely. At the "design speed" for a given bank angle &theta;, friction isn't needed at all: tan&theta; = v²/(rg).</p></div>
+        <div class="panel"><h4>Vertical circular motion</h4><p style="font-size:13px;">Going around a <b style="color:var(--text);">vertical</b> loop (e.g. a roller coaster or a ball on a string), gravity contributes to the centripetal force at the top and opposes it at the bottom:</p>
+          <div class="formula-box" style="display:block; font-size:12.5px;">Top: F<sub>net</sub> = F<sub>N</sub> + mg = mv²/r &nbsp;|&nbsp; Bottom: F<sub>net</sub> = F<sub>N</sub> − mg = mv²/r</div>
+          <p style="font-size:12.5px;">At the top, normal force can drop to zero at minimum speed (v<sub>min</sub> = &radic;(gr)) — any slower and the object can't maintain the circular path and falls away from the track.</p></div>
+      </div>
+      <div class="panel" style="margin-top:16px;"><h4>Satellite orbits</h4><p style="font-size:13px;">A satellite's weight <i>is</i> its centripetal force — gravity supplies exactly what's needed to keep it turning: GMm/r² = mv²/r = m(4&pi;²r)/T². This is why orbit height and orbital period are linked: a higher orbit means a slower, longer-period orbit.</p></div>
+    </div>
+
+    <div class="tabpanel" id="tab-workenergy">
+      <div class="panel">
+        <div class="formula-box" style="display:block;">W = F &times; s (= area under a force-distance graph) &nbsp;&nbsp;|&nbsp;&nbsp; W = &Delta;E<sub>k</sub></div>
+        <div class="grid2">
+          <div>
+            <div class="control-row"><label>Force</label><input type="range" id="weForce" min="0" max="200" value="60"><span class="readout" id="weForceR">60 N</span></div>
+            <div class="control-row"><label>Distance</label><input type="range" id="weDist" min="0" max="20" value="8" step="0.5"><span class="readout" id="weDistR">8.0 m</span></div>
+            <div class="callout">Work done = <span class="readout" id="weWork">—</span></div>
+          </div>
+          <div class="diagram-frame" style="display:flex; align-items:center; justify-content:center;">
+            <svg id="weSvg" viewBox="0 0 200 140" width="190"></svg>
+          </div>
+        </div>
+      </div>
+      <div class="grid3" style="margin-top:16px;">
+        <div class="panel"><h4>Kinetic energy</h4><div class="formula-box" style="display:block; font-size:13px;">E<sub>k</sub> = &frac12;mv²</div><p style="font-size:12.5px;">Energy of motion (at everyday, non-relativistic speeds).</p></div>
+        <div class="panel"><h4>Elastic potential energy</h4><div class="formula-box" style="display:block; font-size:13px;">E<sub>s</sub> = &frac12;kx²</div><p style="font-size:12.5px;">Stored in a stretched/compressed ideal spring obeying Hooke's Law — also the area under a force-extension graph.</p></div>
+        <div class="panel"><h4>Gravitational PE</h4><div class="formula-box" style="display:block; font-size:13px;">E<sub>g</sub> = mg&Delta;h</div><p style="font-size:12.5px;">Or the area under a force-distance / field-distance graph &times; mass, for a uniform field.</p></div>
+      </div>
+      <div class="panel" style="margin-top:16px;">
+        <h4>Elastic vs inelastic collisions</h4>
+        <p style="font-size:13px;">Momentum is conserved in <b style="color:var(--text);">every</b> isolated collision. Kinetic energy is only conserved in a perfectly <b style="color:var(--text);">elastic</b> collision (objects bounce apart, no lasting deformation). In an <b style="color:var(--text);">inelastic</b> collision, some kinetic energy converts to heat, sound and deformation of the material — a perfectly inelastic collision is one where the objects stick together and lose the maximum possible kinetic energy while still conserving momentum.</p>
+      </div>
     </div>
 
     <div class="tabpanel" id="tab-momentum">
@@ -1073,12 +1153,14 @@ table.compare td{padding:6px 8px; border-bottom:1px solid var(--line); color:var
 
   <section class="topic" id="phys-fields">
     <div class="topic-head"><span class="num">22</span><h2>Fields</h2></div>
+    <div class="simple-box"><b>Simple version</b>A field is an invisible zone of influence around something — gravity pulls things toward a planet, electric charges pull or push other charges, and magnets pull or push other magnets or moving charges, all without touching.</div>
     <p class="topic-sub">Three "action at a distance" forces recur throughout Unit 3, and they all share the same inverse-square shape (except magnetic force on a moving charge, which behaves a little differently). A field is a way of mapping the strength and direction of a force at every point in space, without needing a second object physically present yet.</p>
 
     <div class="tabs" id="fieldsTabs">
       <button data-tab="grav" class="active">Gravitational</button>
       <button data-tab="elec">Electric</button>
       <button data-tab="mag">Magnetic</button>
+      <button data-tab="motorsaccel">Motors &amp; Accelerators</button>
     </div>
 
     <div class="tabpanel active" id="tab-grav">
@@ -1135,10 +1217,32 @@ table.compare td{padding:6px 8px; border-bottom:1px solid var(--line); color:var
         </div>
       </div>
     </div>
+
+    <div class="tabpanel" id="tab-motorsaccel">
+      <div class="grid2">
+        <div class="panel">
+          <h4>Simple DC motor</h4>
+          <p style="font-size:13px;">A single coil (several loops of wire) sits free to rotate inside a uniform magnetic field. Current flowing through the coil experiences a force (F = nIlB) on each side, and because the two sides carry current in opposite directions, the forces form a couple that turns the coil.</p>
+          <p style="font-size:13px;">A <b style="color:var(--text);">split-ring commutator</b> reverses the current in the coil every half-turn, so the torque keeps acting in the same rotational sense instead of the coil oscillating back and forth and stalling.</p>
+          <div class="formula-box" style="display:block;">F = nIlB &nbsp;(n = number of loops, I = current, l = conductor length, B = field strength)</div>
+          <p style="font-size:12.5px;">Torque increases with more current, a stronger external field, or more loops of wire — but the torque is not constant through a rotation: it's greatest when the coil plane is parallel to the field, and zero when perpendicular to it.</p>
+        </div>
+        <div class="panel">
+          <h4>Particle accelerators (incl. synchrotrons)</h4>
+          <p style="font-size:13px;">Charged particles are accelerated using the two field effects covered in this section, combined:</p>
+          <ul style="font-size:13px; color:var(--text-dim); padding-left:18px;">
+            <li><b style="color:var(--text);">Linear acceleration</b> — a uniform electric field does work on the charge, speeding it up (same F = qE physics as above).</li>
+            <li><b style="color:var(--text);">Direction change</b> — a uniform magnetic field bends the particle's path without changing its speed (F = qvB, always perpendicular to v), which is what keeps particles moving in the circular/near-circular path of a synchrotron while separate sections re-accelerate them.</li>
+          </ul>
+          <p style="font-size:12.5px;">Modelled as uniform circular motion: qvB = mv²/r, so a stronger field or faster particle needs a larger radius to match.</p>
+        </div>
+      </div>
+    </div>
   </section>
 
   <section class="topic" id="phys-induction">
     <div class="topic-head"><span class="num">23</span><h2>Electromagnetic Induction</h2></div>
+    <div class="simple-box"><b>Simple version</b>If you move a magnet near a coil of wire (or spin a coil inside a magnet), you generate electricity, with no battery involved. This is how basically all the world's electricity is made.</div>
     <p class="topic-sub">Move a magnet near a coil and you induce an EMF — this is how every generator on the planet makes electricity. Faraday's Law says the size of the EMF depends on how fast the magnetic flux through the coil is changing; Lenz's Law says the induced current always flows in the direction that opposes that change.</p>
     <div class="formula-box" style="display:block; margin-bottom:16px;">EMF = -N &times; (&Delta;&Phi; / &Delta;t)</div>
     <div class="panel">
@@ -1165,18 +1269,38 @@ table.compare td{padding:6px 8px; border-bottom:1px solid var(--line); color:var
       <div class="diagram-frame">
         <svg id="genSvg" viewBox="0 0 620 160" style="max-width:100%;"></svg>
       </div>
+      <p style="font-size:12.5px; margin-top:10px;">Described with reference to frequency, period, amplitude, peak-to-peak voltage (V<sub>p–p</sub>) and peak-to-peak current (I<sub>p–p</sub>).</p>
+    </div>
+
+    <div class="panel" style="margin-top:16px;">
+      <h4>RMS voltage &amp; current</h4>
+      <div class="formula-box" style="display:block;">V<sub>rms</sub> = V<sub>peak</sub> / &radic;2 &nbsp;&nbsp;|&nbsp;&nbsp; I<sub>rms</sub> = I<sub>peak</sub> / &radic;2</div>
+      <p style="font-size:13px;">An alternating voltage's RMS value is the equivalent constant DC voltage that would deliver the <b style="color:var(--text);">same power</b> to a resistive component. Standard "230 V mains" is already an RMS figure — the actual peak voltage swings considerably higher (about 325 V).</p>
+    </div>
+
+    <div class="grid2" style="margin-top:16px;">
+      <div class="panel"><h4>DC generator vs alternator</h4><p style="font-size:13px;">Both convert rotational mechanical energy to electrical energy via induction, but differ in how the rotating coil connects to the external circuit: a <b style="color:var(--text);">DC generator</b> uses a <b style="color:var(--text);">split-ring commutator</b> (like a DC motor in reverse) to keep the output current flowing one direction; an <b style="color:var(--text);">alternator</b> uses continuous <b style="color:var(--text);">slip rings</b>, so the output faithfully follows the coil's sinusoidal EMF as true AC.</p></div>
+      <div class="panel"><h4>Photovoltaic cells &amp; inverters</h4><p style="font-size:13px;">A PV cell generates DC directly from light. Since household appliances and the grid run on AC, an <b style="color:var(--text);">inverter</b> converts the cell's DC output to AC before it can be used in the home or exported to the grid (the internal semiconductor/circuit detail isn't required — just that the conversion is necessary).</p></div>
+    </div>
+
+    <div class="panel" style="margin-top:16px;">
+      <h4>Transmission losses</h4>
+      <p style="font-size:13px;">Power lines have resistance, so some transmitted power is lost as heat: P<sub>loss</sub> = I²R. Because loss scales with the <b style="color:var(--text);">square</b> of current, power companies step voltage <b style="color:var(--text);">up</b> (and current down) for long-distance transmission using transformers, then step it back down near homes — the same power delivered at a much lower current means far less lost to line resistance.</p>
     </div>
   </section>
 
   <section class="topic" id="phys-waves">
     <div class="topic-head"><span class="num">24</span><h2>Waves, Light &amp; Quanta</h2></div>
+    <div class="simple-box"><b>Simple version</b>Light sometimes behaves like a wave (spreading out, overlapping, cancelling out) and sometimes behaves like a stream of tiny particles (photons). Both descriptions are needed, and neither one alone is the full story.</div>
     <p class="topic-sub">Unit 4 asks how two seemingly contradictory models — waves and particles — can both be needed to explain light and matter. It starts with ordinary wave behaviour, then shows where that model breaks down.</p>
 
     <div class="tabs" id="wavesTabs">
       <button data-tab="waveprops" class="active">Wave Properties</button>
+      <button data-tab="standing">Standing Waves &amp; Diffraction</button>
       <button data-tab="interference">Interference</button>
       <button data-tab="photoelectric">Photoelectric Effect</button>
       <button data-tab="duality">Wave-Particle Duality</button>
+      <button data-tab="spectra">Atomic Spectra</button>
     </div>
 
     <div class="tabpanel active" id="tab-waveprops">
@@ -1188,6 +1312,25 @@ table.compare td{padding:6px 8px; border-bottom:1px solid var(--line); color:var
         </div>
         <div class="diagram-frame">
           <svg id="waveSvg" viewBox="0 0 400 140" style="max-width:100%;"></svg>
+        </div>
+      </div>
+    </div>
+
+    <div class="tabpanel" id="tab-standing">
+      <div class="grid2">
+        <div class="panel">
+          <h4>Standing waves</h4>
+          <p style="font-size:13px;">When a travelling wave reflects back on itself (e.g. off a fixed end), the original and reflected waves superpose. At certain frequencies this produces a <b style="color:var(--text);">standing wave</b> — a pattern that appears to stay still, with fixed <b style="color:var(--text);">nodes</b> (no displacement) and <b style="color:var(--text);">antinodes</b> (maximum displacement) rather than a travelling crest.</p>
+          <p style="font-size:12.5px;">This course only requires standing waves with nodes at <b style="color:var(--text);">both</b> ends (like a guitar string fixed at both ends).</p>
+        </div>
+        <div class="panel">
+          <h4>Diffraction</h4>
+          <p style="font-size:13px;">Diffraction is the directional spread of a wave after passing a gap or obstacle. How much it spreads depends on the ratio of wavelength to gap/obstacle width, &lambda;/w:</p>
+          <ul style="font-size:13px; color:var(--text-dim); padding-left:18px;">
+            <li>&lambda;/w <b style="color:var(--text);">small</b> (gap much wider than wavelength) → little spreading, the wave mostly travels straight through</li>
+            <li>&lambda;/w <b style="color:var(--text);">large</b> (gap comparable to or smaller than wavelength) → strong spreading in all directions</li>
+          </ul>
+          <p style="font-size:12.5px;">This sets a practical limit on <b style="color:var(--text);">imaging</b>: you can't resolve detail smaller than roughly the wavelength of the wave you're imaging with — one reason electron microscopes (tiny de Broglie wavelength) resolve far finer detail than light microscopes.</p>
         </div>
       </div>
     </div>
@@ -1211,7 +1354,7 @@ table.compare td{padding:6px 8px; border-bottom:1px solid var(--line); color:var
           <div class="control-row"><label>Light frequency f</label><input type="range" id="peFreq" min="1" max="20" step="0.5" value="8"><span class="readout" id="peFreqR">8 ×10¹⁴ Hz</span></div>
           <div class="control-row"><label>Work function W</label><input type="range" id="peWork" min="1" max="10" step="0.5" value="5"><span class="readout" id="peWorkR">5 ×10⁻¹⁹ J</span></div>
           <div class="callout" id="peResult"></div>
-          <p style="font-size:12.5px;">Below the threshold frequency, <b style="color:var(--text);">no electrons are ejected no matter how bright the light is</b> — a result the wave model can't explain, but the particle (photon) model can: each photon carries a fixed energy hf, and a photon below the threshold energy just can't knock an electron out, regardless of how many photons arrive.</p>
+          <p style="font-size:12.5px;">Below the threshold frequency, <b style="color:var(--text);">no electrons are ejected no matter how bright the light is</b> — a result the wave model can't explain, but the particle (photon) model can: each photon carries a fixed energy hf, and a photon below the threshold energy just can't knock an electron out, regardless of how many photons arrive. Increasing intensity at a fixed frequency above threshold increases the <b style="color:var(--text);">number</b> of photoelectrons ejected, not their maximum kinetic energy.</p>
         </div>
         <div class="diagram-frame">
           <svg id="peSvg" viewBox="0 0 300 220" width="280"></svg>
@@ -1221,7 +1364,7 @@ table.compare td{padding:6px 8px; border-bottom:1px solid var(--line); color:var
 
     <div class="tabpanel" id="tab-duality">
       <div class="panel">
-        <div class="formula-box" style="display:block;">&lambda; = h / p = h / (mv)</div>
+        <div class="formula-box" style="display:block;">&lambda; = h / p = h / (mv) &nbsp;&nbsp;|&nbsp;&nbsp; p<sub>photon</sub> = h / &lambda;</div>
         <p style="font-size:13px;">De Broglie proposed that if light (a wave) can behave like particles, matter (particles) should also have a wave nature. Every moving object has a wavelength — it's just unimaginably small for anything bigger than an electron.</p>
         <div class="grid2">
           <div>
@@ -1230,7 +1373,79 @@ table.compare td{padding:6px 8px; border-bottom:1px solid var(--line); color:var
           </div>
           <div class="callout" id="deResult" style="align-self:center;"></div>
         </div>
+        <p style="font-size:13px; margin-top:10px;">A photon of the same wavelength as a moving particle carries momentum p = h/&lambda; — comparing photon and matter momentum at equal wavelengths is a standard exam-style calculation.</p>
+        <p style="font-size:13px;"><b style="color:var(--text);">Evidence for duality:</b> electron diffraction patterns (electrons fired at a crystal produce ring patterns just like X-ray diffraction) show matter's wave-like nature. The <b style="color:var(--text);">single-photon / single-electron double-slit experiment</b> — sending particles through one at a time — still builds up an interference pattern over many trials, showing each individual particle behaves as though it interferes with itself as a wave, yet arrives at the detector as a single localised particle. This dual behaviour is the strongest evidence that light and matter are neither purely wave nor purely particle.</p>
       </div>
+    </div>
+
+    <div class="tabpanel" id="tab-spectra">
+      <div class="panel">
+        <h4>Atomic absorption &amp; emission line spectra</h4>
+        <p style="font-size:13px;">Electrons in an atom occupy discrete (quantised) energy states. An electron can jump to a <b style="color:var(--text);">higher</b> state by absorbing a photon, or drop to a <b style="color:var(--text);">lower</b> state by emitting one — in both cases the photon's energy exactly matches the difference between the two states:</p>
+        <div class="formula-box" style="display:block;">E = hf = hc/&lambda; = E<sub>high</sub> − E<sub>low</sub></div>
+        <p style="font-size:13px;">An <b style="color:var(--text);">emission spectrum</b> (e.g. from a metal vapour lamp) shows bright lines at exactly the wavelengths the atom can emit. An <b style="color:var(--text);">absorption spectrum</b> shows dark lines at the same wavelengths, where atoms in a cooler gas have absorbed light of just those energies from a continuous source passing through. Because each element's energy states are unique, its line spectrum acts as a fingerprint — which is how astronomers identify the composition of distant stars.</p>
+        <p style="font-size:12.5px; margin-top:8px;">This quantisation is a unifying idea across the topic: it's the same reasoning that explains why the photoelectric effect has a threshold frequency, and it applies equally to explaining the structure of atoms.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="topic" id="phys-relativity">
+    <div class="topic-head"><span class="num">25</span><h2>Einstein's Special Theory of Relativity</h2></div>
+    <div class="simple-box"><b>Simple version</b>At everyday speeds, time and distance feel fixed and the same for everyone. Einstein showed that once you're moving close to the speed of light, time actually runs slower for you and distances actually shrink, compared to someone standing still.</div>
+    <p class="topic-sub">Classical (Newtonian) mechanics quietly assumes that time and length are absolute — the same for every observer. Einstein showed that breaks down at speeds approaching the speed of light, and rebuilt mechanics from two postulates instead.</p>
+
+    <div class="grid2">
+      <div class="panel">
+        <h4>The two postulates</h4>
+        <p style="font-size:13px;"><b style="color:var(--text);">1.</b> The laws of physics are the same in all inertial (non-accelerated) frames of reference — there's no experiment you can run inside a closed, smoothly-moving lab that tells you your own speed.</p>
+        <p style="font-size:13px;"><b style="color:var(--text);">2.</b> The speed of light in a vacuum, c, has the same value for <b style="color:var(--text);">every</b> observer, regardless of their own motion or the motion of the light source.</p>
+        <p style="font-size:12.5px;">Postulate 2 is the strange one: unlike a ball thrown from a moving car, light doesn't go any faster if its source is moving toward you. Something else has to give — and what gives is the assumption that time and length are the same for everyone.</p>
+      </div>
+      <div class="panel">
+        <h4>The Michelson-Morley experiment</h4>
+        <p style="font-size:13px;">Before Einstein, physicists expected light's speed to vary depending on Earth's motion through a hypothesised medium (the "aether"), the way sound's measured speed depends on the observer's motion through air. Michelson and Morley very precisely compared light's speed in perpendicular directions and found <b style="color:var(--text);">no difference at all</b> — a null result. This is interpreted as strong evidence for Einstein's postulates: light's speed simply doesn't depend on the observer's motion, so there's no aether to detect.</p>
+      </div>
+    </div>
+
+    <div class="panel" style="margin-top:16px;">
+      <h4>Proper time &amp; proper length</h4>
+      <div class="grid2">
+        <div><p style="font-size:13px;"><b style="color:var(--text);">Proper time, t₀</b> — the time interval between two events as measured in the one reference frame where both events happen at the <b style="color:var(--text);">same point in space</b> (e.g. a clock you're carrying with you).</p></div>
+        <div><p style="font-size:13px;"><b style="color:var(--text);">Proper length, L₀</b> — the length of an object as measured in the frame of reference in which the object is <b style="color:var(--text);">at rest</b>.</p></div>
+      </div>
+      <p style="font-size:12.5px;">Any other observer, moving relative to these frames, measures a <b style="color:var(--text);">longer</b> time interval (time dilation) and a <b style="color:var(--text);">shorter</b> length (length contraction) for the same events/object.</p>
+    </div>
+
+    <div class="panel" style="margin-top:16px;">
+      <h4>Time dilation &amp; length contraction calculator</h4>
+      <div class="formula-box" style="display:block;">t = &gamma;t₀ &nbsp;&nbsp;|&nbsp;&nbsp; L = L₀/&gamma; &nbsp;&nbsp;|&nbsp;&nbsp; &gamma; = 1 / &radic;(1 − v²/c²)</div>
+      <div class="grid2">
+        <div>
+          <div class="control-row"><label>Speed (as % of c)</label><input type="range" id="relV" min="0" max="99.5" step="0.5" value="80"><span class="readout" id="relVR">80.0% c</span></div>
+          <div class="callout">&gamma; (Lorentz factor) = <span class="readout" id="relGamma">—</span></div>
+        </div>
+        <div class="callout" style="align-self:center;">
+          A 1.000 s proper-time interval is measured as <span class="readout" id="relTime">—</span> by a stationary observer.<br>
+          A 1.000 m proper length is measured as <span class="readout" id="relLen">—</span> by a stationary observer.
+        </div>
+      </div>
+      <p style="font-size:12.5px; margin-top:8px;">Notice &gamma; barely rises above 1 until v gets close to c, then shoots upward — this is why relativistic effects are utterly unnoticeable in everyday life but become dramatic near light speed.</p>
+    </div>
+
+    <div class="panel" style="margin-top:16px;">
+      <h4>Real-world examples</h4>
+      <div class="grid3">
+        <div><p style="font-size:13px;"><b style="color:var(--text);">Muons</b> created in the upper atmosphere have such short half-lives that, classically, almost none should survive the trip to Earth's surface. Time dilation (from our frame, the fast-moving muon's internal "clock" runs slow) lets far more of them reach the ground than non-relativistic physics predicts.</p></div>
+        <div><p style="font-size:13px;"><b style="color:var(--text);">Particle accelerators</b> must be designed accounting for length contraction and relativistic mass-energy effects at the very high speeds particles reach — classical mechanics alone gives the wrong answers for accelerator geometry and energy requirements.</p></div>
+        <div><p style="font-size:13px;"><b style="color:var(--text);">GPS satellites</b> move fast enough, and sit in a different gravitational potential, that their onboard clocks drift out of sync with ground clocks. Time signals must be corrected for these relativistic effects or GPS positioning would accumulate significant error within minutes.</p></div>
+      </div>
+    </div>
+
+    <div class="panel" style="margin-top:16px;">
+      <h4>Mass-energy equivalence</h4>
+      <div class="formula-box" style="display:block;">E<sub>0</sub> = mc² &nbsp;&nbsp;|&nbsp;&nbsp; E<sub>tot</sub> = E<sub>k</sub> + E<sub>0</sub> = &gamma;mc² &nbsp;&nbsp;|&nbsp;&nbsp; E<sub>k</sub> = (&gamma; − 1)mc²</div>
+      <p style="font-size:13px;">Mass and energy are, in a sense, the same thing viewed two ways. E₀ = mc² is an object's "rest energy" — energy it has purely by virtue of having mass, even standing still. Because c² is enormous, converting even a tiny amount of mass releases a huge amount of energy.</p>
+      <p style="font-size:13px;">Applications: <b style="color:var(--text);">mass conversion in the Sun</b> (nuclear fusion converts a small fraction of mass to energy, powering the Sun's output), <b style="color:var(--text);">positron-electron annihilation</b> (matter and antimatter fully converting to energy/photons), and <b style="color:var(--text);">nuclear transformations</b> in particle accelerators (the specific nuclear processes aren't required in detail — just that mass and energy interconvert according to E = mc²).</p>
     </div>
   </section>
 
@@ -1251,14 +1466,15 @@ table.compare td{padding:6px 8px; border-bottom:1px solid var(--line); color:var
         <div class="formula-box" style="display:block;">F<sub>net</sub> = ma &nbsp;&nbsp;|&nbsp;&nbsp; W = mg</div>
         <div class="formula-box" style="display:block;">p = mv &nbsp;&nbsp;|&nbsp;&nbsp; F = &Delta;p/&Delta;t</div>
         <div class="formula-box" style="display:block;">E<sub>k</sub> = &frac12;mv&sup2; &nbsp;&nbsp;|&nbsp;&nbsp; W = Fs = &Delta;E<sub>k</sub></div>
+        <div class="formula-box" style="display:block;">E<sub>s</sub> = &frac12;kx&sup2; (elastic PE) &nbsp;&nbsp;|&nbsp;&nbsp; E<sub>g</sub> = mg&Delta;h</div>
         <p style="font-size:12px;">W here (first line) is weight in newtons; W later is work done in joules — same symbol, different meaning, watch the context.</p>
       </div>
       <div class="panel">
         <h4>Motion — Circular &amp; Rotational</h4>
         <div class="formula-box" style="display:block;">v = 2&pi;r / T</div>
-        <div class="formula-box" style="display:block;">a<sub>c</sub> = v&sup2;/r</div>
+        <div class="formula-box" style="display:block;">a<sub>c</sub> = v&sup2;/r = 4&pi;&sup2;r/T&sup2;</div>
         <div class="formula-box" style="display:block;">F<sub>c</sub> = mv&sup2;/r</div>
-        <p style="font-size:12px;">T = period (s) for one full revolution. Centripetal acceleration/force always points toward the centre.</p>
+        <p style="font-size:12px;">T = period (s) for one full revolution. Centripetal acceleration/force always points toward the centre. Banked track (no friction needed): tan&theta; = v²/(rg).</p>
       </div>
       <div class="panel">
         <h4>Fields — Gravitational</h4>
@@ -1274,16 +1490,18 @@ table.compare td{padding:6px 8px; border-bottom:1px solid var(--line); color:var
         <p style="font-size:12px;">k = 8.99×10⁹ N·m²/C². d = plate separation (m) for a uniform field between parallel plates.</p>
       </div>
       <div class="panel">
-        <h4>Fields — Magnetic</h4>
+        <h4>Fields — Magnetic &amp; Motors</h4>
         <div class="formula-box" style="display:block;">F = qvB &nbsp;&nbsp;|&nbsp;&nbsp; F = BIL</div>
-        <p style="font-size:12px;">Force on a moving charge / current-carrying conductor. Direction from the right-hand slap rule (positive charges).</p>
+        <div class="formula-box" style="display:block;">F = nIlB (torque-producing force in a motor coil)</div>
+        <p style="font-size:12px;">Force on a moving charge / current-carrying conductor. Direction from the right-hand slap rule (positive charges). n = number of loops.</p>
       </div>
       <div class="panel">
-        <h4>Electromagnetic Induction</h4>
+        <h4>Electromagnetic Induction &amp; Generation</h4>
         <div class="formula-box" style="display:block;">&Phi; = BA</div>
         <div class="formula-box" style="display:block;">EMF = -N (&Delta;&Phi;/&Delta;t)</div>
         <div class="formula-box" style="display:block;">EMF = BLv (motional EMF)</div>
-        <div class="formula-box" style="display:block;">V<sub>p</sub>/V<sub>s</sub> = N<sub>p</sub>/N<sub>s</sub> (transformer)</div>
+        <div class="formula-box" style="display:block;">N&#8321;/N&#8322; = V&#8321;/V&#8322; = I&#8322;/I&#8321; (ideal transformer)</div>
+        <div class="formula-box" style="display:block;">V<sub>rms</sub> = V<sub>peak</sub>/&radic;2 &nbsp;&nbsp;|&nbsp;&nbsp; P<sub>loss</sub> = I&sup2;R</div>
         <p style="font-size:12px;">&Phi; = magnetic flux (Wb), A = area of coil, N = number of turns. Minus sign is Lenz's Law — induced EMF opposes the change.</p>
       </div>
       <div class="panel">
@@ -1308,6 +1526,13 @@ table.compare td{padding:6px 8px; border-bottom:1px solid var(--line); color:var
         <p style="font-size:12px;">h = 6.626×10⁻³⁴ J·s (Planck's constant). W₀ = work function (minimum energy to eject an electron).</p>
       </div>
       <div class="panel">
+        <h4>Special Relativity</h4>
+        <div class="formula-box" style="display:block;">&gamma; = 1/&radic;(1 − v&sup2;/c&sup2;)</div>
+        <div class="formula-box" style="display:block;">t = &gamma;t&#8320; &nbsp;&nbsp;|&nbsp;&nbsp; L = L&#8320;/&gamma;</div>
+        <div class="formula-box" style="display:block;">E&#8320; = mc&sup2; &nbsp;&nbsp;|&nbsp;&nbsp; E<sub>tot</sub> = &gamma;mc&sup2; &nbsp;&nbsp;|&nbsp;&nbsp; E<sub>k</sub> = (&gamma;−1)mc&sup2;</div>
+        <p style="font-size:12px;">t₀ = proper time, L₀ = proper length (both measured in the frame where the events/object are at rest).</p>
+      </div>
+      <div class="panel">
         <h4>Constants</h4>
         <p style="font-size:12.5px; line-height:2;">
           g = 9.8 m/s² (near Earth's surface)<br>
@@ -1325,7 +1550,7 @@ table.compare td{padding:6px 8px; border-bottom:1px solid var(--line); color:var
 </main>
 
 <footer>
-  BUILT FOR SYSTEMS ENGINEERING 3&amp;4 AND PHYSICS 3&amp;4 · NO DATA COLLECTED, NO BACKEND · OPEN SOURCE ON GITHUB PAGES
+  BUILT FOR VCE SYSTEMS ENGINEERING 3&amp;4 AND PHYSICS 3&amp;4 · OPEN SOURCE ON GITHUB PAGES
 </footer>
 <script>
 (function(){
@@ -1388,6 +1613,106 @@ function fmt(n, d){ d = (d===undefined)?2:d; if(!isFinite(n)) return '—'; retu
       input.focus();
     });
   }
+})();
+
+(function(){
+  const searchInput = document.getElementById('siteSearch');
+  const resultsBox = document.getElementById('siteResults');
+  if(!searchInput) return;
+  const sections = Array.from(document.querySelectorAll('main section.topic')).map(sec=>{
+    const heading = sec.querySelector('h2') ? sec.querySelector('h2').textContent.trim() : sec.id;
+    return { id: sec.id, heading, text: sec.textContent.replace(/\s+/g,' ').trim() };
+  });
+
+  function runSearch(q){
+    q = q.trim().toLowerCase();
+    resultsBox.innerHTML = '';
+    if(!q){ resultsBox.classList.remove('open'); return; }
+    const hits = sections.filter(s=> s.heading.toLowerCase().includes(q) || s.text.toLowerCase().includes(q)).slice(0,8);
+    if(hits.length===0){
+      resultsBox.innerHTML = '<div class="no-results">No results for "'+q.replace(/</g,'&lt;')+'"</div>';
+      resultsBox.classList.add('open');
+      return;
+    }
+    hits.forEach(h=>{
+      const idx = h.text.toLowerCase().indexOf(q);
+      let snippet = idx>=0 ? h.text.substring(Math.max(0,idx-40), idx+60) : h.text.substring(0,80);
+      const re = new RegExp('('+q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+')','ig');
+      snippet = snippet.replace(re, '<mark class="searchhit">$1</mark>');
+      const a = document.createElement('a');
+      a.href = '#'+h.id;
+      a.innerHTML = '<b>'+h.heading+'</b><br>…'+snippet+'…';
+      a.addEventListener('click', ()=>{ resultsBox.classList.remove('open'); });
+      resultsBox.appendChild(a);
+    });
+    resultsBox.classList.add('open');
+  }
+  searchInput.addEventListener('input', ()=>runSearch(searchInput.value));
+  searchInput.addEventListener('focus', ()=>{ if(searchInput.value.trim()) resultsBox.classList.add('open'); });
+  document.addEventListener('click', (e)=>{
+    if(!e.target.closest('.site-search')) resultsBox.classList.remove('open');
+  });
+})();
+(function(){
+  const TERMS = [
+    'bridge rectifier', "Lenz's law", "Ohm's Law", "Newton's third law", 'capacitor time constant',
+    'gear ratio', 'photoelectric effect', 'hierarchy of controls', 'free body diagram', 'cradle-to-cradle analysis',
+    'transformer turns ratio', 'mechanical advantage', 'conservation of momentum', 'centripetal force', 'stepper motor',
+    'de Broglie wavelength', 'voltage divider', 'series vs parallel', 'clean energy technologies', 'open-loop system',
+    'torque and moments', "Pascal's law", 'work function', "Faraday's law", 'diffraction grating',
+    'relay switching', 'gravitational field', 'agile production', 'risk assessment', 'NPN transistor',
+    'inclined plane', 'hydraulic piston force', 'AC generator', 'wheel and axle', 'spring constant',
+    'electromagnetic induction', 'projectile motion', 'compound gear train', 'solenoid', "right-hand grip rule",
+    'wave-particle duality', 'zener diode', 'hooke\'s law', 'crank and slider', 'DPDT switch',
+  ];
+
+  function shuffled(arr){
+    const a = arr.slice();
+    for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; }
+    return a;
+  }
+
+  function animatePlaceholder(inputEl, basePrefix){
+    if(!inputEl) return;
+    let queue = shuffled(TERMS);
+    let qi = 0;
+    let paused = false;
+    let timer = null;
+    let gen = 0;
+
+    function next(){
+      gen++;
+      if(qi >= queue.length){ queue = shuffled(TERMS); qi = 0; }
+      const word = queue[qi++];
+      typeWord(word, gen);
+    }
+    function typeWord(word, myGen){
+      let i = 0;
+      function typeStep(){
+        if(paused || myGen !== gen) return;
+        i++;
+        inputEl.setAttribute('placeholder', basePrefix+word.substring(0,i));
+        if(i < word.length){ timer = setTimeout(typeStep, 55); }
+        else { timer = setTimeout(untypeStep, 1400); }
+      }
+      function untypeStep(){
+        if(paused || myGen !== gen) return;
+        i--;
+        inputEl.setAttribute('placeholder', basePrefix+word.substring(0,Math.max(0,i)));
+        if(i > 0){ timer = setTimeout(untypeStep, 30); }
+        else { timer = setTimeout(()=>{ if(myGen===gen) next(); }, 350); }
+      }
+      typeStep();
+    }
+    inputEl.addEventListener('focus', ()=>{ paused = true; clearTimeout(timer); });
+    inputEl.addEventListener('blur', ()=>{
+      if(!inputEl.value){ paused = false; next(); }
+    });
+    next();
+  }
+
+  animatePlaceholder(document.getElementById('lockSearch'), '');
+  animatePlaceholder(document.getElementById('siteSearch'), '');
 })();
 
 (function(){
@@ -2488,6 +2813,52 @@ updateVD();
     document.getElementById('nlAccel').textContent = fmt(f/m,2)+' m/s²';
   }
   massS.addEventListener('input', update); forceS.addEventListener('input', update);
+  update();
+})();
+
+(function(){
+  const svg = document.getElementById('weSvg');
+  if(!svg) return;
+  const box = el('rect',{y:60,width:30,height:30, fill:'#0f2338', stroke:'#4fd1e8','stroke-width':2.5});
+  svg.appendChild(el('line',{x1:10,y1:92,x2:190,y2:92, stroke:'#1d3f5e','stroke-width':1.5}));
+  svg.appendChild(box);
+  const arrowG = el('g',{}); svg.appendChild(arrowG);
+  const fS=document.getElementById('weForce'), dS=document.getElementById('weDist');
+  function update(){
+    const f=parseFloat(fS.value), d=parseFloat(dS.value);
+    document.getElementById('weForceR').textContent = f+' N';
+    document.getElementById('weDistR').textContent = fmt(d,1)+' m';
+    document.getElementById('weWork').textContent = fmt(f*d,1)+' J';
+    const x0 = 20, len = 20+Math.min(140, d*8);
+    box.setAttribute('x', x0);
+    arrowG.innerHTML='';
+    if(f>0){
+      const ax2 = x0+30+Math.min(30, f*0.15);
+      arrowG.appendChild(el('line',{x1:x0+30,y1:75,x2:ax2,y2:75, stroke:'#f4b740','stroke-width':2.5}));
+      arrowG.appendChild(el('polygon',{points:`${ax2},75 ${ax2-7},70 ${ax2-7},80`, fill:'#f4b740'}));
+    }
+    svg.querySelectorAll('.distmark').forEach(n=>n.remove());
+    const mark = el('line',{x1:x0+15,y1:96,x2:x0+15+len,y2:96, stroke:'#6fef9f','stroke-width':2});
+    mark.setAttribute('class','distmark');
+    svg.appendChild(mark);
+  }
+  [fS,dS].forEach(x=>x.addEventListener('input', update));
+  update();
+})();
+
+(function(){
+  const vS = document.getElementById('relV');
+  if(!vS) return;
+  function update(){
+    const pct = parseFloat(vS.value);
+    document.getElementById('relVR').textContent = fmt(pct,1)+'% c';
+    const beta = pct/100;
+    const gamma = 1/Math.sqrt(Math.max(1e-9, 1-beta*beta));
+    document.getElementById('relGamma').textContent = fmt(gamma,4);
+    document.getElementById('relTime').textContent = fmt(gamma,4)+' s';
+    document.getElementById('relLen').textContent = fmt(1/gamma,4)+' m';
+  }
+  vS.addEventListener('input', update);
   update();
 })();
 
