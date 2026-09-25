@@ -216,6 +216,26 @@ mark.searchhit{background:var(--amber); color:#1a1200; border-radius:2px; paddin
 .ai-answer b{color:var(--cyan); font-family:var(--mono); font-size:11px; text-transform:uppercase; letter-spacing:0.06em; display:block; margin-bottom:6px;}
 .ai-ask-btn{display:block; width:100%; text-align:left; background:none; border:none; border-top:1px solid var(--line); color:var(--cyan); font-family:var(--mono); font-size:12px; padding:10px 14px; cursor:pointer;}
 .ai-ask-btn:hover{background:var(--panel-2);}
+.ai-panel{position:fixed; top:0; right:-420px; width:400px; max-width:92vw; height:100%; background:var(--panel); border-left:1px solid var(--line-bright); z-index:1500; display:flex; flex-direction:column; transition:right .28s ease; box-shadow:-14px 0 40px rgba(0,0,0,0.4);}
+.ai-panel.open{right:0;}
+.ai-panel-head{display:flex; align-items:center; justify-content:space-between; padding:14px 16px; border-bottom:1px solid var(--line); flex-shrink:0;}
+.ai-panel-head h3{margin:0; font-size:14px; color:var(--text);}
+.ai-panel-head .btns{display:flex; gap:6px;}
+.ai-panel-head button{background:none; border:none; color:var(--text-faint); font-size:16px; cursor:pointer; padding:4px 6px; border-radius:var(--radius);}
+.ai-panel-head button:hover{color:var(--text); background:var(--panel-2);}
+.ai-context{font-family:var(--mono); font-size:10.5px; color:var(--text-faint); padding:8px 16px; border-bottom:1px solid var(--line); flex-shrink:0;}
+.ai-context b{color:var(--green);}
+.ai-messages{flex:1; overflow-y:auto; padding:14px 16px; display:flex; flex-direction:column; gap:12px;}
+.chat-msg{max-width:88%; padding:9px 12px; border-radius:10px; font-size:13px; line-height:1.5;}
+.chat-msg.user{align-self:flex-end; background:var(--cyan); color:#04222c;}
+.chat-msg.ai{align-self:flex-start; background:var(--panel-2); border:1px solid var(--line-bright); color:var(--text-dim);}
+.chat-msg.ai a{color:var(--green); font-weight:600; display:inline-block; margin-top:6px;}
+.chat-msg.system{align-self:center; color:var(--text-faint); font-size:11.5px; text-align:center;}
+.ai-panel-input{display:flex; gap:8px; padding:12px 14px; border-top:1px solid var(--line); flex-shrink:0;}
+.ai-panel-input input{flex:1; background:var(--panel-2); border:1px solid var(--line-bright); color:var(--text); border-radius:18px; padding:9px 14px; font-family:var(--mono); font-size:12.5px; outline:none;}
+.ai-panel-input input:focus{border-color:var(--cyan);}
+.ai-panel-input button{background:var(--cyan); color:#04222c; border:none; border-radius:50%; width:34px; height:34px; font-size:15px; cursor:pointer; flex-shrink:0;}
+@media (max-width:480px){ .ai-panel{width:100vw;} }
 .tablewrap{overflow-x:auto;}
 table.compare{width:100%; border-collapse:collapse; font-size:12.8px;}
 table.compare th{color:var(--cyan); font-family:var(--mono); text-align:left; padding:6px 8px; border-bottom:1px solid var(--line-bright);}
@@ -251,6 +271,25 @@ table.compare td{padding:6px 8px; border-bottom:1px solid var(--line); color:var
     </div>
   </div>
 </div>
+
+<div id="aiPanel" class="ai-panel">
+  <div class="ai-panel-head">
+    <h3>🤖 Ask AI</h3>
+    <div class="btns">
+      <button id="aiPanelSettingsBtn" title="Settings">⚙️</button>
+      <button id="aiPanelCloseBtn" title="Close">✕</button>
+    </div>
+  </div>
+  <div class="ai-context" id="aiContext">Watching: <b id="aiContextHeading">—</b></div>
+  <div class="ai-messages" id="aiMessages">
+    <div class="chat-msg system">Ask about anything on this site — I can see which section you're currently looking at and use it as context.</div>
+  </div>
+  <div class="ai-panel-input">
+    <input id="aiChatInput" type="text" placeholder="Ask a question..." autocomplete="off" spellcheck="false">
+    <button id="aiChatSend">➤</button>
+  </div>
+</div>
+
 <div class="nav-wrap">
   <div class="topbar">
     <div class="brand"><span class="dot"></span>SYS ENG &amp; PHYSICS 3&4</div>
@@ -264,7 +303,7 @@ table.compare td{padding:6px 8px; border-bottom:1px solid var(--line); color:var
       <input id="siteSearch" type="text" placeholder="Search the guide..." autocomplete="off" spellcheck="false">
       <div id="siteResults"></div>
     </div>
-    <button class="subj-btn" id="aiSettingsBtn" title="AI search settings" style="padding:7px 10px;">🤖</button>
+    <button class="subj-btn" id="aiBotBtn" title="Ask AI" style="padding:7px 10px;">🤖</button>
   </div>
   <nav class="submenu topnav" id="submenu-systems">
     <a href="#process">Systems Process</a>
@@ -1650,9 +1689,17 @@ function fmt(n, d){ d = (d===undefined)?2:d; if(!isFinite(n)) return '—'; retu
     const heading = sec.querySelector('h2') ? sec.querySelector('h2').textContent.trim() : sec.id;
     return { id: sec.id, heading, text: sec.textContent.replace(/\s+/g,' ').trim() };
   });
+  window.__seSections = sections;
 
   function runSearch(q){
     q = q.trim().toLowerCase();
+    if(q === 'ai'){
+      resultsBox.classList.remove('open');
+      searchInput.value = '';
+      searchInput.blur();
+      if(window.__openAiPanel) window.__openAiPanel();
+      return;
+    }
     resultsBox.innerHTML = '';
     if(!q){ resultsBox.classList.remove('open'); return; }
     const hits = sections.filter(s=> s.heading.toLowerCase().includes(q) || s.text.toLowerCase().includes(q)).slice(0,6);
@@ -1671,16 +1718,16 @@ function fmt(n, d){ d = (d===undefined)?2:d; if(!isFinite(n)) return '—'; retu
         resultsBox.appendChild(a);
       });
     }
-    let hasKey = false;
-    try{ hasKey = !!localStorage.getItem('orApiKey'); }catch(e){}
-    if(hasKey){
-      const askBtn = document.createElement('button');
-      askBtn.type = 'button';
-      askBtn.className = 'ai-ask-btn';
-      askBtn.textContent = '🤖 Ask AI about "'+q+'"';
-      askBtn.addEventListener('click', ()=> askAI(q, hits));
-      resultsBox.appendChild(askBtn);
-    }
+    const askBtn = document.createElement('button');
+    askBtn.type = 'button';
+    askBtn.className = 'ai-ask-btn';
+    askBtn.textContent = '🤖 Ask AI about "'+q+'"';
+    askBtn.addEventListener('click', ()=>{
+      resultsBox.classList.remove('open');
+      searchInput.value = '';
+      if(window.__openAiPanel) window.__openAiPanel(q);
+    });
+    resultsBox.appendChild(askBtn);
     resultsBox.classList.add('open');
   }
   window.__seRunSearch = runSearch;
@@ -1689,96 +1736,23 @@ function fmt(n, d){ d = (d===undefined)?2:d; if(!isFinite(n)) return '—'; retu
   document.addEventListener('click', (e)=>{
     if(!e.target.closest('.site-search') && !e.target.closest('.ai-modal')) resultsBox.classList.remove('open');
   });
-
-  async function askAI(question, hits){
-    let old = resultsBox.querySelector('.ai-answer');
-    if(old) old.remove();
-    const box = document.createElement('div');
-    box.className = 'ai-answer';
-    box.innerHTML = '<b>AI answer</b>Thinking…';
-    resultsBox.appendChild(box);
-
-    let key = null, model = 'openrouter/free';
-    try{
-      key = localStorage.getItem('orApiKey');
-      model = localStorage.getItem('orModel') || model;
-    }catch(e){}
-    if(!key){
-      box.innerHTML = '<b>AI answer</b>No API key set yet. Click the 🤖 button in the top bar to add your free OpenRouter key.';
-      return;
-    }
-    const context = hits.slice(0,3).map(h=> h.heading+': '+h.text.substring(0,600)).join('\n\n');
-    const sectionIndex = sections.map(s=> s.id+' — '+s.heading).join('\n');
-    const sys = "You are a concise tutor for VCE Systems Engineering and Physics Units 3&4, embedded in an interactive study guide website. "
-      + "Answer the student's question in 3-5 short sentences, plain language first, using the provided excerpts as context if relevant (you can also use your own knowledge). "
-      + "You must also pick the ONE section from the site's section list below that best matches the question, so the student can be sent straight there. "
-      + "Respond with ONLY valid JSON, no markdown fences, no extra text, in exactly this shape: {\"answer\": \"...\", \"section_id\": \"...\", \"section_heading\": \"...\"}. "
-      + "section_id must be copied exactly from the list (the part before the — ). If truly nothing fits, use null for both section fields.\n\nSite sections:\n" + sectionIndex;
-    try{
-      const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer '+key,
-        },
-        body: JSON.stringify({
-          model: model,
-          messages: [
-            { role: 'system', content: sys },
-            { role: 'user', content: 'Study guide excerpts:\n'+context+'\n\nQuestion: '+question }
-          ],
-          max_tokens: 450,
-        })
-      });
-      if(!res.ok){
-        const errText = await res.text();
-        box.innerHTML = '<b>AI answer</b>Request failed ('+res.status+'). Check your API key/model in 🤖 settings.<br><span style="font-size:10.5px; color:var(--text-faint);">'+errText.substring(0,200).replace(/</g,'&lt;')+'</span>';
-        return;
-      }
-      const data = await res.json();
-      let raw = data.choices && data.choices[0] && data.choices[0].message ? data.choices[0].message.content : '';
-      raw = raw.trim().replace(/^```(json)?/i,'').replace(/```$/,'').trim();
-      let parsed = null;
-      try{ parsed = JSON.parse(raw); }catch(e){ parsed = null; }
-
-      let answerHtml, linkHtml = '';
-      if(parsed && parsed.answer){
-        answerHtml = parsed.answer.replace(/</g,'&lt;').replace(/\n/g,'<br>');
-        const validSection = parsed.section_id && sections.find(s=> s.id === parsed.section_id);
-        if(validSection){
-          linkHtml = '<a href="#'+validSection.id+'" style="display:inline-block; margin-top:8px; color:var(--green); font-weight:600;" onclick="document.getElementById(\'siteResults\').classList.remove(\'open\')">📍 Jump to: '+validSection.heading+'</a>';
-        } else if(hits && hits[0]){
-          linkHtml = '<a href="#'+hits[0].id+'" style="display:inline-block; margin-top:8px; color:var(--green); font-weight:600;" onclick="document.getElementById(\'siteResults\').classList.remove(\'open\')">📍 Jump to: '+hits[0].heading+'</a>';
-        }
-      } else {
-        answerHtml = (raw || 'No answer returned.').replace(/</g,'&lt;').replace(/\n/g,'<br>');
-        if(hits && hits[0]){
-          linkHtml = '<a href="#'+hits[0].id+'" style="display:inline-block; margin-top:8px; color:var(--green); font-weight:600;" onclick="document.getElementById(\'siteResults\').classList.remove(\'open\')">📍 Jump to: '+hits[0].heading+'</a>';
-        }
-      }
-      box.innerHTML = '<b>AI answer</b>' + answerHtml + linkHtml;
-    }catch(err){
-      box.innerHTML = '<b>AI answer</b>Couldn\'t reach OpenRouter — this only works when the page is hosted normally (e.g. GitHub Pages) or opened as a local file, not inside a sandboxed preview.';
-    }
-  }
 })();
 
 (function(){
   const modal = document.getElementById('aiModal');
-  const openBtn = document.getElementById('aiSettingsBtn');
   const closeBtn = document.getElementById('aiCloseBtn');
   const saveBtn = document.getElementById('aiSaveBtn');
   const clearBtn = document.getElementById('aiClearBtn');
   const keyInput = document.getElementById('aiKeyInput');
   const modelInput = document.getElementById('aiModelInput');
-  if(!modal || !openBtn) return;
-  openBtn.addEventListener('click', ()=>{
+  if(!modal) return;
+  window.__openAiModal = function(){
     try{
       keyInput.value = localStorage.getItem('orApiKey') || '';
       modelInput.value = localStorage.getItem('orModel') || 'openrouter/free';
     }catch(e){}
     modal.classList.remove('hidden');
-  });
+  };
   closeBtn.addEventListener('click', ()=> modal.classList.add('hidden'));
   modal.addEventListener('click', (e)=>{ if(e.target===modal) modal.classList.add('hidden'); });
   saveBtn.addEventListener('click', ()=>{
@@ -1792,6 +1766,131 @@ function fmt(n, d){ d = (d===undefined)?2:d; if(!isFinite(n)) return '—'; retu
     try{ localStorage.removeItem('orApiKey'); }catch(e){}
     keyInput.value = '';
   });
+})();
+
+(function(){
+  const panel = document.getElementById('aiPanel');
+  const botBtn = document.getElementById('aiBotBtn');
+  const closeBtn = document.getElementById('aiPanelCloseBtn');
+  const settingsBtn = document.getElementById('aiPanelSettingsBtn');
+  const messages = document.getElementById('aiMessages');
+  const input = document.getElementById('aiChatInput');
+  const sendBtn = document.getElementById('aiChatSend');
+  const contextHeading = document.getElementById('aiContextHeading');
+  if(!panel) return;
+
+  // Track which section is currently in view ("what you're looking at")
+  let currentSection = null;
+  const sectionEls = Array.from(document.querySelectorAll('main section.topic'));
+  if('IntersectionObserver' in window && sectionEls.length){
+    const visible = new Map();
+    const io = new IntersectionObserver((entries)=>{
+      entries.forEach(e=> visible.set(e.target, e.intersectionRatio));
+      let best = null, bestRatio = 0;
+      visible.forEach((ratio, el)=>{ if(ratio > bestRatio){ bestRatio = ratio; best = el; } });
+      if(best){
+        const heading = best.querySelector('h2') ? best.querySelector('h2').textContent.trim() : best.id;
+        currentSection = { id: best.id, heading };
+        contextHeading.textContent = heading;
+      }
+    }, { threshold: [0, 0.15, 0.3, 0.5, 0.75, 1] });
+    sectionEls.forEach(el=> io.observe(el));
+  }
+
+  window.__openAiPanel = function(prefill){
+    panel.classList.add('open');
+    if(prefill){ input.value = prefill; }
+    setTimeout(()=> input.focus(), 300);
+  };
+  botBtn.addEventListener('click', ()=> window.__openAiPanel());
+  closeBtn.addEventListener('click', ()=> panel.classList.remove('open'));
+  settingsBtn.addEventListener('click', ()=>{ if(window.__openAiModal) window.__openAiModal(); });
+
+  function addBubble(role, html){
+    const b = document.createElement('div');
+    b.className = 'chat-msg '+role;
+    b.innerHTML = html;
+    messages.appendChild(b);
+    messages.scrollTop = messages.scrollHeight;
+    return b;
+  }
+
+  const history = []; // {role:'user'|'assistant', content:'...'}
+
+  async function sendMessage(){
+    const q = input.value.trim();
+    if(!q) return;
+    input.value = '';
+    addBubble('user', q.replace(/</g,'&lt;'));
+    history.push({role:'user', content:q});
+
+    let key = null, model = 'openrouter/free';
+    try{
+      key = localStorage.getItem('orApiKey');
+      model = localStorage.getItem('orModel') || model;
+    }catch(e){}
+    if(!key){
+      addBubble('ai', 'No API key set yet — click ⚙️ above to add your free OpenRouter key.');
+      return;
+    }
+
+    const thinking = addBubble('ai', 'Thinking…');
+
+    const sections = window.__seSections || [];
+    const sectionIndex = sections.map(s=> s.id+' — '+s.heading).join('\n');
+    const watchingText = currentSection
+      ? sections.find(s=> s.id===currentSection.id)
+      : null;
+    const watchingContext = watchingText ? (watchingText.heading+': '+watchingText.text.substring(0,700)) : 'Unknown — no section currently in view.';
+
+    const sys = "You are a friendly, concise AI tutor embedded in a VCE Systems Engineering & Physics Units 3&4 study guide website. "
+      + "You can see which section of the page the student currently has in view (given below as 'Currently on screen') — treat that as what they're looking at right now, and use it as primary context if their question doesn't specify a topic. "
+      + "Answer in 3-5 short sentences, plain language first. "
+      + "You must also pick the ONE section from the site's section list that best matches the question or their current view, so they can jump straight there. "
+      + "Respond with ONLY valid JSON, no markdown fences, no extra text, in exactly this shape: {\"answer\": \"...\", \"section_id\": \"...\", \"section_heading\": \"...\"}. "
+      + "section_id must be copied exactly from the list (the part before the — ). If truly nothing fits, use null for both section fields.\n\n"
+      + "Currently on screen:\n" + watchingContext + "\n\nSite sections:\n" + sectionIndex;
+
+    const payloadMessages = [{ role:'system', content: sys }].concat(history.slice(-8));
+
+    try{
+      const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer '+key },
+        body: JSON.stringify({ model: model, messages: payloadMessages, max_tokens: 450 })
+      });
+      if(!res.ok){
+        const errText = await res.text();
+        thinking.innerHTML = 'Request failed ('+res.status+'). Check your API key/model via ⚙️.<br><span style="font-size:10.5px; color:var(--text-faint);">'+errText.substring(0,200).replace(/</g,'&lt;')+'</span>';
+        return;
+      }
+      const data = await res.json();
+      let raw = data.choices && data.choices[0] && data.choices[0].message ? data.choices[0].message.content : '';
+      raw = raw.trim().replace(/^```(json)?/i,'').replace(/```$/,'').trim();
+      let parsed = null;
+      try{ parsed = JSON.parse(raw); }catch(e){ parsed = null; }
+
+      let answerText, answerHtml, linkHtml = '';
+      if(parsed && parsed.answer){
+        answerText = parsed.answer;
+        answerHtml = answerText.replace(/</g,'&lt;').replace(/\n/g,'<br>');
+        const validSection = parsed.section_id && sections.find(s=> s.id === parsed.section_id);
+        if(validSection){
+          linkHtml = '<a href="#'+validSection.id+'">📍 Jump to: '+validSection.heading+'</a>';
+        }
+      } else {
+        answerText = raw || 'No answer returned.';
+        answerHtml = answerText.replace(/</g,'&lt;').replace(/\n/g,'<br>');
+      }
+      thinking.innerHTML = answerHtml + linkHtml;
+      history.push({role:'assistant', content: answerText});
+    }catch(err){
+      thinking.innerHTML = 'Couldn\'t reach OpenRouter — this only works when the page is hosted normally (e.g. GitHub Pages) or opened as a local file, not inside a sandboxed preview.';
+    }
+  }
+
+  sendBtn.addEventListener('click', sendMessage);
+  input.addEventListener('keydown', (e)=>{ if(e.key==='Enter') sendMessage(); });
 })();
 (function(){
   const TERMS = [
