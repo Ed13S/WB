@@ -1577,7 +1577,7 @@ table.compare td{padding:6px 8px; border-bottom:1px solid var(--line); color:var
 </main>
 
 <footer>
-  BUILT FOR SYSTEMS ENGINEERING 3&amp;4 AND PHYSICS 3&amp;4 · OPEN SOURCE ON GITHUB PAGES
+  BUILT FOR SYSTEMS ENGINEERING 3&amp;4 AND PHYSICS 3&amp;4 · OPEN SOURCE ON GITHUB PAGES.
 </footer>
 <script>
 (function(){
@@ -1698,7 +1698,7 @@ function fmt(n, d){ d = (d===undefined)?2:d; if(!isFinite(n)) return '—'; retu
     box.innerHTML = '<b>AI answer</b>Thinking…';
     resultsBox.appendChild(box);
 
-    let key = null, model = 'meta-llama/llama-3.2-3b-instruct:free';
+    let key = null, model = 'openrouter/free';
     try{
       key = localStorage.getItem('orApiKey');
       model = localStorage.getItem('orModel') || model;
@@ -1708,7 +1708,12 @@ function fmt(n, d){ d = (d===undefined)?2:d; if(!isFinite(n)) return '—'; retu
       return;
     }
     const context = hits.slice(0,3).map(h=> h.heading+': '+h.text.substring(0,600)).join('\n\n');
-    const sys = "You are a concise tutor for VCE Systems Engineering and Physics Units 3&4. Answer the student's question in 3-5 short sentences, plain language first. Use the provided study-guide excerpts as context if relevant, but you can also use your own knowledge.";
+    const sectionIndex = sections.map(s=> s.id+' — '+s.heading).join('\n');
+    const sys = "You are a concise tutor for VCE Systems Engineering and Physics Units 3&4, embedded in an interactive study guide website. "
+      + "Answer the student's question in 3-5 short sentences, plain language first, using the provided excerpts as context if relevant (you can also use your own knowledge). "
+      + "You must also pick the ONE section from the site's section list below that best matches the question, so the student can be sent straight there. "
+      + "Respond with ONLY valid JSON, no markdown fences, no extra text, in exactly this shape: {\"answer\": \"...\", \"section_id\": \"...\", \"section_heading\": \"...\"}. "
+      + "section_id must be copied exactly from the list (the part before the — ). If truly nothing fits, use null for both section fields.\n\nSite sections:\n" + sectionIndex;
     try{
       const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
         method: 'POST',
@@ -1720,9 +1725,9 @@ function fmt(n, d){ d = (d===undefined)?2:d; if(!isFinite(n)) return '—'; retu
           model: model,
           messages: [
             { role: 'system', content: sys },
-            { role: 'user', content: 'Study guide context:\n'+context+'\n\nQuestion: '+question }
+            { role: 'user', content: 'Study guide excerpts:\n'+context+'\n\nQuestion: '+question }
           ],
-          max_tokens: 400,
+          max_tokens: 450,
         })
       });
       if(!res.ok){
@@ -1731,8 +1736,27 @@ function fmt(n, d){ d = (d===undefined)?2:d; if(!isFinite(n)) return '—'; retu
         return;
       }
       const data = await res.json();
-      const answer = data.choices && data.choices[0] && data.choices[0].message ? data.choices[0].message.content : 'No answer returned.';
-      box.innerHTML = '<b>AI answer</b>' + answer.replace(/</g,'&lt;').replace(/\n/g,'<br>');
+      let raw = data.choices && data.choices[0] && data.choices[0].message ? data.choices[0].message.content : '';
+      raw = raw.trim().replace(/^```(json)?/i,'').replace(/```$/,'').trim();
+      let parsed = null;
+      try{ parsed = JSON.parse(raw); }catch(e){ parsed = null; }
+
+      let answerHtml, linkHtml = '';
+      if(parsed && parsed.answer){
+        answerHtml = parsed.answer.replace(/</g,'&lt;').replace(/\n/g,'<br>');
+        const validSection = parsed.section_id && sections.find(s=> s.id === parsed.section_id);
+        if(validSection){
+          linkHtml = '<a href="#'+validSection.id+'" style="display:inline-block; margin-top:8px; color:var(--green); font-weight:600;" onclick="document.getElementById(\'siteResults\').classList.remove(\'open\')">📍 Jump to: '+validSection.heading+'</a>';
+        } else if(hits && hits[0]){
+          linkHtml = '<a href="#'+hits[0].id+'" style="display:inline-block; margin-top:8px; color:var(--green); font-weight:600;" onclick="document.getElementById(\'siteResults\').classList.remove(\'open\')">📍 Jump to: '+hits[0].heading+'</a>';
+        }
+      } else {
+        answerHtml = (raw || 'No answer returned.').replace(/</g,'&lt;').replace(/\n/g,'<br>');
+        if(hits && hits[0]){
+          linkHtml = '<a href="#'+hits[0].id+'" style="display:inline-block; margin-top:8px; color:var(--green); font-weight:600;" onclick="document.getElementById(\'siteResults\').classList.remove(\'open\')">📍 Jump to: '+hits[0].heading+'</a>';
+        }
+      }
+      box.innerHTML = '<b>AI answer</b>' + answerHtml + linkHtml;
     }catch(err){
       box.innerHTML = '<b>AI answer</b>Couldn\'t reach OpenRouter — this only works when the page is hosted normally (e.g. GitHub Pages) or opened as a local file, not inside a sandboxed preview.';
     }
@@ -1751,7 +1775,7 @@ function fmt(n, d){ d = (d===undefined)?2:d; if(!isFinite(n)) return '—'; retu
   openBtn.addEventListener('click', ()=>{
     try{
       keyInput.value = localStorage.getItem('orApiKey') || '';
-      modelInput.value = localStorage.getItem('orModel') || 'meta-llama/llama-3.2-3b-instruct:free';
+      modelInput.value = localStorage.getItem('orModel') || 'openrouter/free';
     }catch(e){}
     modal.classList.remove('hidden');
   });
@@ -1760,7 +1784,7 @@ function fmt(n, d){ d = (d===undefined)?2:d; if(!isFinite(n)) return '—'; retu
   saveBtn.addEventListener('click', ()=>{
     try{
       if(keyInput.value.trim()) localStorage.setItem('orApiKey', keyInput.value.trim());
-      localStorage.setItem('orModel', modelInput.value.trim() || 'meta-llama/llama-3.2-3b-instruct:free');
+      localStorage.setItem('orModel', modelInput.value.trim() || 'openrouter/free');
     }catch(e){}
     modal.classList.add('hidden');
   });
