@@ -1,4 +1,4 @@
-# WB — Systems Engineering & Physics 3&4 Interactive Study Guide
+# Systems Engineering & Physics 3&4 Interactive Study Guide
 
 An interactive, single-page revision companion for **VCE Systems Engineering Units 3&4** and **VCE Physics Units 3&4**, built for exam revision against the 2026 study design. The idea: *see the systems, not just the formulae.*
 
